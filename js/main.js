@@ -2,44 +2,46 @@ new Vue({
     el: '#app',
     data: {
         columns: [
-            { title: 'Новые задачи', cards: [] },
-            { title: 'Ну вот почти-почти', cards: [] },
+            { title: 'Запланированные задачи', cards: [] },
+            { title: 'Задачи в работе', cards: [] },
+            { title: 'Тестирование', cards: [] },
             { title: 'Выполненые задачи', cards: [] },
         ],
-        newTaskText: [],
+        newTaskDate: [],
+        newTaskDescription: [],
         newCardTitle: [],
-        priorityCard: null,
     },
     methods: {
-        setPriority(card) {
-            const columnIndex = this.columns.findIndex(column => column.cards.includes(card));
-
-            if (columnIndex === 2) {
-                this.priorityCard = null;
-            } else {
-                if (this.priorityCard === card) {
-                    this.priorityCard = null;
-                } else {
-                    this.priorityCard = card;
-                }
-            }
+        removeCard(columnIndex, cardIndex) {
+            this.columns[columnIndex].cards.splice(cardIndex, 1);
             this.saveData();
         },
-        show(){
-            let carts = document.querySelectorAll('.cart');
-            for (let cart of carts){
-                if(cart.style.display === "flex"){
-                    cart.style.display = "none"
+        show(index){
+            if (index === 0){
+                let descriptions = document.querySelectorAll('.description');
+                for (let description of descriptions){
+                    if(description.style.display === "none"){
+                        description.style.display = "flex"
+                    }
+                    else description.style.display = 'none';
                 }
-                else cart.style.display = 'flex';
+            }
+            else {
+                let carts = document.querySelectorAll('.cart');
+                for (let cart of carts){
+                    if(cart.style.display === "flex"){
+                        cart.style.display = "none"
+                    }
+                    else cart.style.display = 'flex';
+                }
             }
         },
         formatDate(date) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             return date.toLocaleString('ru-RU', options);
         },
-        isEditable(index) {
-            return index === 0 ? this.columns[0].cards.length < 3 : true;
+        isEditable(index, card) {
+            return index === 0 ? card.items.length >= 1 : true;
         },
         isEditable2(index) {
             return index === 0 ? this.columns[1].cards.length < 5 : true;
@@ -60,17 +62,14 @@ new Vue({
             this.saveData();
         },
         addTask(card) {
-            const taskText = this.newTaskText[this.columns.findIndex(column => column.cards.includes(card))];
+            const taskDescription = this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))];
+            const taskDate = this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))];
 
-            if (taskText && taskText.trim() !== '') {
-                if (card.items.length < 5){
-                    card.items.push({ text: taskText, completed: false, completedAt: null });
-                    this.newTaskText[this.columns.findIndex(column => column.cards.includes(card))] = '';
-                    this.saveData();
-                }
-                else {
-                    document.getElementById('error').innerHTML = "Максимум 5 задач"
-                }
+            if (taskDescription && taskDate){
+                card.items.push({description: taskDescription ,deadline: taskDate, completed: false, completedAt: null });
+                this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))] = '';
+                this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))] = '';
+                this.saveData();
             }
         },
         updateCompletion(card) {
@@ -106,33 +105,21 @@ new Vue({
         },
         saveData() {
             localStorage.setItem('taskManagerData', JSON.stringify(this.columns));
-            localStorage.setItem('priorityCardId', this.priorityCard ? this.priorityCard.id : null);
         },
         clearStorage() {
             localStorage.removeItem('taskManagerData');
-            localStorage.removeItem('priorityCard');
             this.columns = [
-                { title: 'Новые задачи', cards: [] },
-                { title: 'Ну вот почти-почти', cards: [] },
+                { title: 'Запланированные задачи', cards: [] },
+                { title: 'Задачи в работе', cards: [] },
+                { title: 'Тестирование', cards: [] },
                 { title: 'Выполненые задачи', cards: [] },
             ];
-            this.priorityCard = null;
         }
     },
     mounted() {
         const savedData = localStorage.getItem('taskManagerData');
-        const savedPriorityCardId = localStorage.getItem('priorityCardId');
         if (savedData) {
             this.columns = JSON.parse(savedData);
-        }
-        if (savedPriorityCardId) {
-            const cardId = parseInt(savedPriorityCardId, 10);
-            for (const column of this.columns) {
-                const card = column.cards.find(card => card.id === cardId);
-                if (card) {
-                    this.priorityCard = card;
-                }
-            }
         }
     }
 });
