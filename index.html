@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="js/vue.js"></script>
+    <script defer src="js/main.js"></script>
+    <title>Твой задачник</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="app">
+    <div style="display: flex; flex-direction: column; width: max-content; gap: 10px; margin-top: 20px">
+        <button class="button" @click="clearStorage"><img src="assets/trashBox.png" alt="trashBox"><strong>ALL</strong></button>
+        <button class="button" @click="show()"><img src="assets/plass.png" alt="plass"></button>
+    </div>
+    <div>
+        <div v-for="(column, index) in columns" :key="index" class="column">
+            <h2>{{ column.title }}</h2>
+            <div v-for="(card, cardIndex) in column.cards" :key="cardIndex" class="card">
+                <div style="display: flex; gap: 30px; align-items: center">
+                    <h3>{{ card.title }}</h3>
+                    <button class="star" @click="setPriority(card)"><img style="width: 30px; height: 30px" src="assets/star.png" alt=""></button>
+                </div>
+                <ul>
+                    <li v-for="(item, itemIndex) in card.items" :key="itemIndex">
+                        <input :disabled="!isEditable2(index) || index === 2 || card.items.length < 3 || (priorityCard && priorityCard !== card)" type="checkbox" v-model="item.completed" @change="updateCompletion(card)" />
+                        <span :class="{ completed: item.completed }">{{ item.text }}</span>
+                    </li>
+                </ul>
+                <div style="display: flex; flex-direction: row; width: 40%;; gap: 5px">
+                    <input :disabled="!isEditable2(index) || (priorityCard && priorityCard !== card)" v-if="index === 0" v-model="newTaskText[columns.findIndex(column => column.cards.includes(card))]" placeholder="Новая задача">
+                    <button :disabled="!isEditable2(index) || (priorityCard && priorityCard !== card)" v-if="index === 0" @click="addTask(card)">+</button>
+                </div>
+                <p style="color: red" id="error"></p>
+                <div v-if="card.completedAt">
+                    <strong>Завершено:</strong> {{ formatDate(new Date(card.completedAt)) }}
+                </div>
+            </div>
+            <div style="display: flex; gap: 20px">
+                <input :disabled="!isEditable(index) || !isEditable2(index) || (priorityCard && priorityCard !== card)" class="cart" v-if="index === 0" type="text" v-model="newCardTitle[index]" placeholder="Введите заголовок карточки" />
+                <button class="cart" v-if="index === 0" @click="addCard(index); show()" :disabled="!isEditable(index) || !isEditable2(index) || (priorityCard && priorityCard !== card)">Добавить карточку</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
