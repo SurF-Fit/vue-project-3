@@ -20,10 +20,10 @@ new Vue({
             if (index === 0){
                 let descriptions = document.querySelectorAll('.description');
                 for (let description of descriptions){
-                    if(description.style.display === "none"){
-                        description.style.display = "flex"
+                    if(description.style.display === "flex"){
+                        description.style.display = "none"
                     }
-                    else description.style.display = 'none';
+                    else description.style.display = 'flex';
                 }
             }
             else {
@@ -37,7 +37,7 @@ new Vue({
             }
         },
         formatDate(date) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             return date.toLocaleString('ru-RU', options);
         },
         isEditable(index, card) {
@@ -46,7 +46,7 @@ new Vue({
         isEditable2(index) {
             return index === 0 ? this.columns[1].cards.length < 5 : true;
         },
-        addCard(columnIndex) {
+        addCard(columnIndex, card) {
             if (this.newCardTitle[columnIndex].trim() === '') return;
 
             const newCard = {
@@ -59,6 +59,7 @@ new Vue({
 
             this.columns[columnIndex].cards.push(newCard);
             this.newCardTitle[columnIndex] = '';
+            card.completedAt = new Date().toLocaleString();
             this.saveData();
         },
         addTask(card) {
@@ -67,6 +68,10 @@ new Vue({
 
             if (taskDescription && taskDate){
                 card.items.push({description: taskDescription ,deadline: taskDate, completed: false, completedAt: null });
+                if(card.items.length > 1){
+                    card.items.splice(card.items[0], 1)
+                }
+                card.completedAt = new Date().toLocaleString();
                 this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.saveData();
