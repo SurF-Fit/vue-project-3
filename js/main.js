@@ -63,26 +63,19 @@ new Vue({
             this.newCardTitle[columnIndex] = '';
             this.saveData();
         },
-        addReturn(card) {
-            const taskReturn = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
-
-            card.items[1].push({taskReturn: taskReturn});
-            if(card.items.length > 1){
-                card.items.splice(card.items[0], 1)
-            }
-            card.completedAt = new Date().toLocaleString();
-            this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
-            this.saveData();
-        },
         addTask(card) {
             const taskDescription = this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))];
             const taskDate = this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))];
             const taskReturn = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
 
             if (taskDescription && taskDate){
-                card.items.push({description: taskDescription ,deadline: taskDate, taskReturn: taskReturn,  completed: false, completedAt: null });
-                if(card.items.length > 1){
-                    card.items.splice(card.items[0], 1)
+                card.items.push({description: taskDescription ,deadline: taskDate, taskReturn: taskReturn ?? '',  completed: false, completedAt: null });
+                if (card.items.length > 0) {
+                    card.items[0].description = taskDescription;
+                    card.items[0].deadline = taskDate;
+                    card.items[0].taskReturn = taskReturn ?? '';
+                } else {
+                    card.items.push({ description: taskDescription, deadline: taskDate, taskReturn: taskReturn ?? '', completed: false, completedAt: null });
                 }
                 card.completedAt = new Date().toLocaleString();
                 this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))] = '';
@@ -94,11 +87,24 @@ new Vue({
         returnCard(card) {
             const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));
 
-            card.completedAt = new Date().toLocaleString();
-            this.columns[currentColumnIndex - 1].cards.push(card);
-            this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
+            if (currentColumnIndex > 0) {
+                const reason = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
+                if (reason) {
+                    if (card.items.length > 0) {
+                        card.items[0].taskReturn = reason;
+                    } else {
+                        card.items.push({ taskReturn: reason, completed: false });
+                    }
 
-            this.saveData()
+                    this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
+                    card.completedAt = new Date().toLocaleString();
+                    this.columns[currentColumnIndex - 1].cards.push(card);
+                    this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
+                    this.saveData();
+                } else {
+                    alert("Пожалуйста, укажите причину возврата.");
+                }
+            }
         },
         updateCompletion(card) {
             const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));

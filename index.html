@@ -41,7 +41,7 @@
                     <button v-if="index === 0 || index === 1 || index === 2" @click="show(card.id)"><img src="assets/plass.png" alt="plass"></button>
                     <button style="width: max-content" v-if="index === 0" @click="updateCompletion(card)">в работу</button>
                     <button style="width: max-content" v-if="index === 1" @click="updateCompletion(card)">Тестирование</button>
-                    <button style="width: max-content" v-if="index === 2 " @click="addReturn(card); returnCard(card)">Возврат</button>
+                    <button style="width: max-content" v-if="index === 2 " @click="returnCard(card)">Возврат</button>
                     <button style="width: max-content" v-if="index === 2" @click="updateCompletion(card)">Выполнено</button>
                 </div>
                 <div v-if="card.completedAt">
