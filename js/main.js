@@ -96,6 +96,7 @@ new Vue({
                     this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
                     this.saveData();
                 } else {
+                    this.show(card.id)
                     alert("Пожалуйста, укажите причину возврата.");
                 }
             }

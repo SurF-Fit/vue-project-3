@@ -27,7 +27,7 @@
                 <div v-for="(item, itemIndex) in card.items" :key="itemIndex">
                     <p>Описание: {{ item.description }}</p>
                     <p v-if="index === 1 && item.taskReturn !== ''">Причина возврата: {{ item.taskReturn }}</p>
-                    <p>Сделать до:  {{ formatDate(new Date(item.deadline)) }}</p>
+                    <p>Сделать до:  {{ item.deadline }}</p>
                     <strong style="color: red" v-if="new Date(item.deadline) < new Date() && index === 3">Задание просрочено</strong>
                     <strong style="color: green" v-if="new Date(item.deadline) >= new Date() && index === 3">Молодцы, вовремя!!!</strong>
                 </div>
