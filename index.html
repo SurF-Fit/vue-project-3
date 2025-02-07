@@ -12,7 +12,7 @@
 <div id="app">
     <div style="display: flex; flex-direction: column; width: max-content; gap: 10px; margin-top: 20px">
         <button class="button" @click="clearStorage()"><img src="assets/trashBox.png" alt="trashBox"><strong>ALL</strong></button>
-        <button class="button" @click="show()"><img src="assets/plass.png" alt="plass"></button>
+        <button class="button" @click="showCard()"><img src="assets/plass.png" alt="plass"></button>
     </div>
     <div>
         <div v-for="(column, index) in columns" :key="index" class="column">
@@ -20,7 +20,7 @@
             <div v-for="(card, cardIndex) in column.cards" :key="cardIndex" class="card">
                 <div style="display: flex; flex-direction: column; align-items: start">
                     <div>
-                        <strong>Дата создания: </strong>{{ formatDate(new Date) }}
+                        <strong>Дата создания: </strong>{{ formatDate(new Date(card.createAt)) }}
                     </div>
                     <h3>Название: {{ card.title }}</h3>
                 </div>
@@ -28,15 +28,16 @@
                     <p>Описание: {{ item.description }}</p>
                     <p>Сделать до: {{ item.deadline }}</p>
                 </div>
-                <div class="description">
-                    <textarea v-if="index === 0" v-model="newTaskDescription[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите описание задачи"></textarea>
-                    <input type="date" v-if="index === 0" v-model="newTaskDate[columns.findIndex(column => column.cards.includes(card))]">
-                    <button style="width: 20%;" v-if="index === 0" @click="addTask(card); show(index)">+</button>
+                <div class="description" v-if="card.showInputs">
+                    <textarea v-if="index === 0 || index === 1 || index === 2" v-model="newTaskDescription[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите описание задачи"></textarea>
+                    <input type="date" v-if="index === 0 || index === 1 || index === 2" v-model="newTaskDate[columns.findIndex(column => column.cards.includes(card))]">
+                    <button style="width: 20%;" v-if="index === 0 || index === 1 || index === 2" @click="addTask(card); show(card.id)">+</button>
                 </div>
                 <p style="color: red" id="error"></p>
                 <div class="buttonOne">
                     <button @click="removeCard(index, cardIndex)"><img src="assets/trashBox.png" alt="trashBox"></button>
-                    <button v-if="index === 0" @click="show(index)"><img src="assets/plass.png" alt="plass"></button>
+                    <button v-if="index === 0 || index === 1 || index === 2" @click="show(card.id)"><img src="assets/plass.png" alt="plass"></button>
+                    <button style="width: max-content" v-if="index === 0 || index === 1 || index === 2" @click="updateCompletion(card)">в работу</button>
                 </div>
                 <div v-if="card.completedAt">
                     <strong>Последнее изменение: </strong>{{ formatDate(new Date(card.completedAt)) }}
@@ -44,7 +45,7 @@
             </div>
             <div style="display: flex; gap: 20px">
                 <input class="cart" v-if="index === 0" type="text" v-model="newCardTitle[index]" placeholder="Введите заголовок" />
-                <button class="cart" v-if="index === 0" @click="addCard(index); show()">Добавить карточку</button>
+                <button class="cart" v-if="index === 0" @click="addCard(index); showCard()">Добавить карточку</button>
             </div>
         </div>
     </div>

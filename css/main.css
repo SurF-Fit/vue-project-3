@@ -52,7 +52,7 @@ h2{
 }
 
 .cart {
-    display: none;
+    display: flex;
     width: max-content;
 }
 
@@ -61,7 +61,7 @@ h2{
 }
 
 .description {
-    display: none; flex-direction: column; width: 70%;; gap: 5px
+    display: flex; flex-direction: column; width: 70%;; gap: 5px
 }
 
  .button {

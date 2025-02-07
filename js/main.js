@@ -16,24 +16,22 @@ new Vue({
             this.columns[columnIndex].cards.splice(cardIndex, 1);
             this.saveData();
         },
-        show(index){
-            if (index === 0){
-                let descriptions = document.querySelectorAll('.description');
-                for (let description of descriptions){
-                    if(description.style.display === "flex"){
-                        description.style.display = "none"
-                    }
-                    else description.style.display = 'flex';
+        showCard(index) {
+            let carts = document.querySelectorAll('.cart');
+            for (let cart of carts){
+                if(cart.style.display === "flex"){
+                    cart.style.display = "none"
                 }
+                else cart.style.display = 'flex';
             }
-            else {
-                let carts = document.querySelectorAll('.cart');
-                for (let cart of carts){
-                    if(cart.style.display === "flex"){
-                        cart.style.display = "none"
-                    }
-                    else cart.style.display = 'flex';
-                }
+        },
+        show(cardId) {
+            const card = this.columns
+                .flatMap(column => column.cards)
+                .find(card => card.id === cardId);
+
+            if (card) {
+                card.showInputs = !card.showInputs;
             }
         },
         formatDate(date) {
@@ -54,12 +52,13 @@ new Vue({
                 title: this.newCardTitle[columnIndex],
                 items: [],
                 completedItems: 0,
-                completedAt: null
+                createAt: new Date().toLocaleString(),
+                completedAt: null,
+                showInputs: false,
             };
 
             this.columns[columnIndex].cards.push(newCard);
             this.newCardTitle[columnIndex] = '';
-            card.completedAt = new Date().toLocaleString();
             this.saveData();
         },
         addTask(card) {
@@ -78,32 +77,11 @@ new Vue({
             }
         },
         updateCompletion(card) {
-            const completedCount = card.items.filter(item => item.completed).length;
-            card.completedItems = completedCount;
-
-            const totalTasks = card.items.length;
-            const rate = (completedCount / totalTasks) * 100;
-
             const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));
 
-            if (rate > 50 && rate < 100 && currentColumnIndex < this.columns.length - 1) {
+            if (currentColumnIndex === 0) {
                 this.columns[currentColumnIndex + 1].cards.push(card);
                 this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
-            }
-
-            if (rate <= 50 && currentColumnIndex > 0) {
-                this.columns[currentColumnIndex - 1].cards.push(card);
-                this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
-            }
-
-            if (rate === 100 && currentColumnIndex < this.columns.length - 1) {
-                card.completedAt = new Date().toLocaleString();
-                this.columns[this.columns.length - 1].cards.push(card);
-                this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
-            }
-
-            if (rate === 100) {
-                this.priorityCard = null;
             }
 
             this.saveData();
