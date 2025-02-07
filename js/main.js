@@ -9,6 +9,7 @@ new Vue({
         ],
         newTaskDate: [],
         newTaskDescription: [],
+        newTaskReturn: [],
         newCardTitle: [],
     },
     methods: {
@@ -33,6 +34,7 @@ new Vue({
             if (card) {
                 card.showInputs = !card.showInputs;
             }
+            this.saveData()
         },
         formatDate(date) {
             const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -61,25 +63,60 @@ new Vue({
             this.newCardTitle[columnIndex] = '';
             this.saveData();
         },
+        addReturn(card) {
+            const taskReturn = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
+
+            card.items[1].push({taskReturn: taskReturn});
+            if(card.items.length > 1){
+                card.items.splice(card.items[0], 1)
+            }
+            card.completedAt = new Date().toLocaleString();
+            this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
+            this.saveData();
+        },
         addTask(card) {
             const taskDescription = this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))];
             const taskDate = this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))];
+            const taskReturn = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
 
             if (taskDescription && taskDate){
-                card.items.push({description: taskDescription ,deadline: taskDate, completed: false, completedAt: null });
+                card.items.push({description: taskDescription ,deadline: taskDate, taskReturn: taskReturn,  completed: false, completedAt: null });
                 if(card.items.length > 1){
                     card.items.splice(card.items[0], 1)
                 }
                 card.completedAt = new Date().toLocaleString();
                 this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))] = '';
+                this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.saveData();
             }
+        },
+        returnCard(card) {
+            const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));
+
+            card.completedAt = new Date().toLocaleString();
+            this.columns[currentColumnIndex - 1].cards.push(card);
+            this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
+
+            this.saveData()
         },
         updateCompletion(card) {
             const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));
 
             if (currentColumnIndex === 0) {
+                card.completedAt = new Date().toLocaleString();
+                this.columns[currentColumnIndex + 1].cards.push(card);
+                this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
+            }
+
+            if (currentColumnIndex === 1) {
+                card.completedAt = new Date().toLocaleString();
+                this.columns[currentColumnIndex + 1].cards.push(card);
+                this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
+            }
+
+            if (currentColumnIndex === 2) {
+                card.completedAt = new Date().toLocaleString();
                 this.columns[currentColumnIndex + 1].cards.push(card);
                 this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
             }

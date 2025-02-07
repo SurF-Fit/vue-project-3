@@ -52,7 +52,7 @@ h2{
 }
 
 .cart {
-    display: flex;
+    display: none;
     width: max-content;
 }
 
