@@ -40,12 +40,6 @@ new Vue({
             const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             return date.toLocaleString('ru-RU', options);
         },
-        isEditable(index, card) {
-            return index === 0 ? card.items.length >= 1 : true;
-        },
-        isEditable2(index) {
-            return index === 0 ? this.columns[1].cards.length < 5 : true;
-        },
         addCard(columnIndex, card) {
             if (this.newCardTitle[columnIndex].trim() === '') return;
 
