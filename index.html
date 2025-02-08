@@ -15,9 +15,9 @@
         <button class="button" @click="showCard()"><img src="assets/plass.png" alt="plass"></button>
     </div>
     <div>
-        <div v-for="(column, index) in columns" :key="index" class="column">
+        <div v-for="(column, columnIndex) in columns" :key="columnIndex" class="column" @dragover="onDragOver" @drop="onDrop(columnIndex)">
             <h2>{{ column.title }}</h2>
-            <div v-for="(card, cardIndex) in column.cards" :key="cardIndex" class="card">
+            <div v-for="(card, cardIndex) in column.cards" :key="cardIndex" class="card" draggable="true" @dragstart="startDrag(columnIndex, card)">
                 <div style="display: flex; flex-direction: column; align-items: start">
                     <div>
                         <strong>Дата создания: </strong>{{ formatDate(new Date(card.createAt)) }}
@@ -26,33 +26,31 @@
                 </div>
                 <div v-for="(item, itemIndex) in card.items" :key="itemIndex">
                     <p>Описание: {{ item.description }}</p>
-                    <p v-if="index === 1 && item.taskReturn !== ''">Причина возврата: {{ item.taskReturn }}</p>
+                    <p v-if="columnIndex === 1 && item.taskReturn !== ''">Причина возврата: {{ item.taskReturn }}</p>
                     <p>Сделать до:  {{ item.deadline }}</p>
-                    <strong style="color: red" v-if="new Date(item.deadline) < new Date() && index === 3">Задание просрочено</strong>
-                    <strong style="color: green" v-if="new Date(item.deadline) >= new Date() && index === 3">Молодцы, вовремя!!!</strong>
+                    <strong style="color: red" v-if="new Date(item.deadline) < new Date() && columnIndex === 3">Задание просрочено</strong>
+                    <strong style="color: green" v-if="new Date(item.deadline) >= new Date() && columnIndex === 3">Молодцы, вовремя!!!</strong>
                 </div>
                 <div class="description" v-if="card.showInputs">
-                    <textarea v-if="index === 0 || index === 1 || index === 2" v-model="newTaskDescription[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите описание задачи"></textarea>
-                    <textarea v-if="index === 2" v-model="newTaskReturn[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите причину возврата"></textarea>
-                    <input type="date" v-if="index === 0" v-model="newTaskDate[columns.findIndex(column => column.cards.includes(card))]">
-                    <button style="width: 20%;" v-if="index === 0 || index === 1 || index === 2" @click="addTask(card); show(card.id)">+</button>
+                    <textarea v-if="columnIndex === 0 || columnIndex === 1 || columnIndex === 2" v-model="newTaskDescription[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите описание задачи"></textarea>
+                    <textarea v-if="columnIndex === 2" v-model="newTaskReturn[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите причину возврата"></textarea>
+                    <input type="date" v-if="columnIndex === 0" v-model="newTaskDate[columns.findIndex(column => column.cards.includes(card))]">
+                    <button style="width: 20%;" v-if="columnIndex === 0 || columnIndex === 1 || columnIndex === 2" @click="addTask(card); show(card.id)">+</button>
                 </div>
                 <p style="color: red" id="error"></p>
                 <div class="buttonOne">
-                    <button v-if="index === 0" @click="removeCard(index, cardIndex)"><img src="assets/trashBox.png" alt="trashBox"></button>
-                    <button v-if="index === 0 || index === 1 || index === 2" @click="show(card.id)"><img src="assets/plass.png" alt="plass"></button>
-                    <button style="width: max-content" v-if="index === 0" @click="updateCompletion(card)">в работу</button>
-                    <button style="width: max-content" v-if="index === 1" @click="updateCompletion(card)">Тестирование</button>
-                    <button style="width: max-content" v-if="index === 2 " @click="returnCard(card)">Возврат</button>
-                    <button style="width: max-content" v-if="index === 2" @click="updateCompletion(card)">Выполнено</button>
+                    <button v-if="columnIndex === 0" @click="removeCard(columnIndex, cardIndex)"><img src="assets/trashBox.png" alt="trashBox"></button>
+                    <button style="width: max-content" v-if="columnIndex === 0 || columnIndex === 1 || columnIndex === 2" @click="show(card.id)">Редактирование</button>
+                    <button style="width: max-content" v-if="columnIndex === 2 " @click="returnCard(card)">Возврат</button>
                 </div>
-                <div v-if="card.completedAt">
-                    <strong>Последнее изменение: </strong>{{ formatDate(new Date(card.completedAt)) }}
+                <div v-for="(item, index) in card.completedAt" :key="index" v-if="card.completedAt">
+                    <strong>Изменение {{ index + 1 }}: </strong>
+                    {{ formatDate(new Date(item.time)) }}
                 </div>
             </div>
             <div style="display: flex; gap: 20px">
-                <input class="cart" v-if="index === 0" type="text" v-model="newCardTitle[index]" placeholder="Введите заголовок" />
-                <button class="cart" v-if="index === 0" @click="addCard(index); showCard()">Добавить карточку</button>
+                <input class="cart" v-if="columnIndex === 0" type="text" v-model="newCardTitle[columnIndex]" placeholder="Введите заголовок" />
+                <button class="cart" v-if="columnIndex === 0" @click="addCard(columnIndex); showCard()">Добавить карточку</button>
             </div>
         </div>
     </div>

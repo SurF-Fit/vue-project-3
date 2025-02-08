@@ -11,6 +11,8 @@ new Vue({
         newTaskDescription: [],
         newTaskReturn: [],
         newCardTitle: [],
+        draggingCard: null,
+        draggingColumnIndex: null,
     },
     methods: {
         removeCard(columnIndex, cardIndex) {
@@ -40,7 +42,7 @@ new Vue({
             const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             return date.toLocaleString('ru-RU', options);
         },
-        addCard(columnIndex, card) {
+        addCard(columnIndex) {
             if (this.newCardTitle[columnIndex].trim() === '') return;
 
             const newCard = {
@@ -49,7 +51,7 @@ new Vue({
                 items: [],
                 completedItems: 0,
                 createAt: new Date().toLocaleString(),
-                completedAt: null,
+                completedAt: [],
                 showInputs: false,
             };
 
@@ -57,21 +59,28 @@ new Vue({
             this.newCardTitle[columnIndex] = '';
             this.saveData();
         },
-        addTask(card) {
+        addTask(card, columnIndex) {
             const taskDescription = this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))];
             const taskDate = this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))];
             const taskReturn = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
+            const title = card.title
 
-            if (taskDescription && taskDate){
-                card.items.push({description: taskDescription ,deadline: taskDate, taskReturn: taskReturn ?? '',  completed: false, completedAt: null });
+            if (taskDescription || taskDate) {
                 if (card.items.length > 0) {
                     card.items[0].description = taskDescription;
-                    card.items[0].deadline = taskDate;
+                    card.items[0].deadline = taskDate ?? '';
                     card.items[0].taskReturn = taskReturn ?? '';
                 } else {
-                    card.items.push({ description: taskDescription, deadline: taskDate, taskReturn: taskReturn ?? '', completed: false, completedAt: null });
+                    card.items.push({
+                        description: taskDescription,
+                        deadline: taskDate,
+                        taskReturn: taskReturn ?? '',
+                        completed: false,
+                        completedAt: null
+                    });
                 }
-                card.completedAt = new Date().toLocaleString();
+                let time = new Date().toLocaleString();
+                card.completedAt.push({time: time})
                 this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
@@ -91,7 +100,8 @@ new Vue({
                     }
 
                     this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
-                    card.completedAt = new Date().toLocaleString();
+                    let time = new Date().toLocaleString();
+                    card.completedAt.push({time: time})
                     this.columns[currentColumnIndex - 1].cards.push(card);
                     this.columns[currentColumnIndex].cards.splice(this.columns[currentColumnIndex].cards.indexOf(card), 1);
                     this.saveData();
@@ -135,6 +145,25 @@ new Vue({
                 { title: 'Тестирование', cards: [] },
                 { title: 'Выполненые задачи', cards: [] },
             ];
+        },
+        startDrag(columnIndex, card) {
+            const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));
+            if (currentColumnIndex < 3){
+                this.draggingCard = card;
+                this.draggingColumnIndex = columnIndex;
+            }
+        },
+        onDrop(columnIndex, card) {
+            if (this.draggingCard) {
+                this.columns[this.draggingColumnIndex].cards.splice(this.columns[this.draggingColumnIndex].cards.indexOf(this.draggingCard), 1);
+                this.columns[columnIndex].cards.push(this.draggingCard);
+                this.draggingCard = null;
+                this.draggingColumnIndex = null;
+                this.saveData();
+            }
+        },
+        onDragOver(event) {
+            event.preventDefault();
         }
     },
     mounted() {
