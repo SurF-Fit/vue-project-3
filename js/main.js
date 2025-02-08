@@ -59,13 +59,25 @@ new Vue({
             this.newCardTitle[columnIndex] = '';
             this.saveData();
         },
-        addTask(card, columnIndex) {
+        addTask(card) {
             const taskDescription = this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))];
             const taskDate = this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))];
             const taskReturn = this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))];
-            const title = card.title
+            const title = this.newCardTitle[this.columns.findIndex(column => column.cards.includes(card))];
+
+            if (title){
+                if(card.newCardTitle > 0){
+                    card.title = title
+                }
+                else {
+                    card.newCardTitle.push(title)
+                }
+                this.newCardTitle[this.columns.findIndex(column => column.cards.includes(card))] = '';
+                this.saveData();
+            }
 
             if (taskDescription || taskDate) {
+
                 if (card.items.length > 0) {
                     card.items[0].description = taskDescription;
                     card.items[0].deadline = taskDate ?? '';
@@ -79,13 +91,13 @@ new Vue({
                         completedAt: null
                     });
                 }
-                let time = new Date().toLocaleString();
-                card.completedAt.push({time: time})
                 this.newTaskDescription[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.newTaskDate[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.newTaskReturn[this.columns.findIndex(column => column.cards.includes(card))] = '';
                 this.saveData();
             }
+            let time = new Date().toLocaleString();
+            card.completedAt.push({time: time})
         },
         returnCard(card) {
             const currentColumnIndex = this.columns.findIndex(column => column.cards.includes(card));

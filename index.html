@@ -32,6 +32,7 @@
                     <strong style="color: green" v-if="new Date(item.deadline) >= new Date() && columnIndex === 3">Молодцы, вовремя!!!</strong>
                 </div>
                 <div class="description" v-if="card.showInputs">
+                    <input type="text" v-if="columnIndex === 0 || columnIndex === 1 || columnIndex === 2" v-model="card.title" placeholder="Введите название задачи">
                     <textarea v-if="columnIndex === 0 || columnIndex === 1 || columnIndex === 2" v-model="newTaskDescription[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите описание задачи"></textarea>
                     <textarea v-if="columnIndex === 2" v-model="newTaskReturn[columns.findIndex(column => column.cards.includes(card))]" placeholder="Введите причину возврата"></textarea>
                     <input type="date" v-if="columnIndex === 0" v-model="newTaskDate[columns.findIndex(column => column.cards.includes(card))]">
